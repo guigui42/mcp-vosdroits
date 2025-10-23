@@ -2,7 +2,10 @@ module github.com/guigui42/mcp-vosdroits
 
 go 1.25.1
 
-require github.com/modelcontextprotocol/go-sdk v0.0.0-20251020185824-cfa7a515a9bc
+require (
+	github.com/gocolly/colly/v2 v2.2.0
+	github.com/modelcontextprotocol/go-sdk v0.0.0-20251020185824-cfa7a515a9bc
+)
 
 require (
 	github.com/PuerkitoBio/goquery v1.10.2 // indirect
@@ -12,7 +15,6 @@ require (
 	github.com/antchfx/xpath v1.3.3 // indirect
 	github.com/bits-and-blooms/bitset v1.22.0 // indirect
 	github.com/gobwas/glob v0.2.3 // indirect
-	github.com/gocolly/colly/v2 v2.2.0 // indirect
 	github.com/golang/groupcache v0.0.0-20241129210726-2c02b8208cf8 // indirect
 	github.com/golang/protobuf v1.5.4 // indirect
 	github.com/google/jsonschema-go v0.3.0 // indirect
@@ -21,7 +23,7 @@ require (
 	github.com/saintfish/chardet v0.0.0-20230101081208-5e3ef4b5456d // indirect
 	github.com/temoto/robotstxt v1.1.2 // indirect
 	github.com/yosida95/uritemplate/v3 v3.0.2 // indirect
-	golang.org/x/net v0.37.0 // indirect
+	golang.org/x/net v0.38.0 // indirect
 	golang.org/x/oauth2 v0.30.0 // indirect
 	golang.org/x/text v0.23.0 // indirect
 	google.golang.org/appengine v1.6.8 // indirect
