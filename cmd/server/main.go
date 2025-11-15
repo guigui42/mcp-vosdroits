@@ -78,21 +78,25 @@ func run() error {
 }
 
 // runWithTransport runs the server with the appropriate transport based on configuration.
-// If HTTPPort is set, it starts an HTTP server with SSE transport.
+// If HTTPPort is set, it starts an HTTP server with Streamable HTTP transport.
 // Otherwise, it uses stdio transport for stdio-based communication.
 func runWithTransport(ctx context.Context, server *mcp.Server, cfg *config.Config) error {
 	if cfg.HTTPPort != "" {
-		slog.Info("Using HTTP/SSE transport", "port", cfg.HTTPPort)
+		slog.Info("Using Streamable HTTP transport", "port", cfg.HTTPPort)
 		
-		// Create SSE handler
-		handler := mcp.NewSSEHandler(func(r *http.Request) *mcp.Server {
+		// Create Streamable HTTP handler
+		handler := mcp.NewStreamableHTTPHandler(func(r *http.Request) *mcp.Server {
 			return server
-		}, nil)
+		}, &mcp.StreamableHTTPOptions{
+			JSONResponse: true,
+			Logger:       slog.Default(),
+		})
 		
 		// Create HTTP server
 		httpServer := &http.Server{
-			Addr:    ":" + cfg.HTTPPort,
-			Handler: handler,
+			Addr:              ":" + cfg.HTTPPort,
+			Handler:           handler,
+			ReadHeaderTimeout: 5 * time.Second,
 		}
 		
 		// Start server in goroutine
