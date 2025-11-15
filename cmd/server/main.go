@@ -82,15 +82,18 @@ func run() error {
 // Otherwise, it uses stdio transport for stdio-based communication.
 func runWithTransport(ctx context.Context, server *mcp.Server, cfg *config.Config) error {
 	if cfg.HTTPPort != "" {
-		slog.Info("Using Streamable HTTP transport", "port", cfg.HTTPPort)
+		slog.Info("Using Streamable HTTP transport", "port", cfg.HTTPPort, "cors_origin", cfg.AllowClientOrigin)
 		
 		// Create Streamable HTTP handler
-		handler := mcp.NewStreamableHTTPHandler(func(r *http.Request) *mcp.Server {
+		mcpHandler := mcp.NewStreamableHTTPHandler(func(r *http.Request) *mcp.Server {
 			return server
 		}, &mcp.StreamableHTTPOptions{
 			JSONResponse: true,
 			Logger:       slog.Default(),
 		})
+		
+		// Wrap with CORS middleware
+		handler := corsMiddleware(mcpHandler, cfg.AllowClientOrigin)
 		
 		// Create HTTP server
 		httpServer := &http.Server{
@@ -122,6 +125,26 @@ func runWithTransport(ctx context.Context, server *mcp.Server, cfg *config.Confi
 	
 	slog.Info("Using stdio transport")
 	return server.Run(ctx, &mcp.StdioTransport{})
+}
+
+// corsMiddleware adds CORS headers to HTTP responses.
+func corsMiddleware(next http.Handler, allowOrigin string) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		// Set CORS headers
+		w.Header().Set("Access-Control-Allow-Origin", allowOrigin)
+		w.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
+		w.Header().Set("Access-Control-Allow-Headers", "Content-Type, Authorization, mcp-protocol-version, mcp-session-id")
+		w.Header().Set("Access-Control-Expose-Headers", "mcp-session-id")
+		
+		// Handle preflight requests
+		if r.Method == "OPTIONS" {
+			w.WriteHeader(http.StatusOK)
+			return
+		}
+		
+		// Call the next handler
+		next.ServeHTTP(w, r)
+	})
 }
 
 func setupLogging(level string) {
