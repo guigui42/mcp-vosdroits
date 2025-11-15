@@ -8,21 +8,23 @@ import (
 
 // Config holds the server configuration.
 type Config struct {
-	ServerName    string
-	ServerVersion string
-	LogLevel      string
-	HTTPTimeout   time.Duration
-	HTTPPort      string
+	ServerName        string
+	ServerVersion     string
+	LogLevel          string
+	HTTPTimeout       time.Duration
+	HTTPPort          string
+	AllowClientOrigin string
 }
 
 // Load returns a new Config loaded from environment variables.
 func Load() *Config {
 	return &Config{
-		ServerName:    getEnv("SERVER_NAME", "vosdroits"),
-		ServerVersion: getEnv("SERVER_VERSION", "v1.0.0"),
-		LogLevel:      getEnv("LOG_LEVEL", "info"),
-		HTTPTimeout:   getEnvDuration("HTTP_TIMEOUT", 30*time.Second),
-		HTTPPort:      getEnv("HTTP_PORT", ""),
+		ServerName:        getEnv("SERVER_NAME", "vosdroits"),
+		ServerVersion:     getEnv("SERVER_VERSION", "v1.0.0"),
+		LogLevel:          getEnv("LOG_LEVEL", "info"),
+		HTTPTimeout:       getEnvDuration("HTTP_TIMEOUT", 30*time.Second),
+		HTTPPort:          getEnv("HTTP_PORT", ""),
+		AllowClientOrigin: getEnv("ALLOW_CLIENT_ORIGIN", "*"),
 	}
 }
 

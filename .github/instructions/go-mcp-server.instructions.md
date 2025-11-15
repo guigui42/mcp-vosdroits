@@ -1,7 +1,8 @@
-<!-- Based on: https://github.com/github/awesome-copilot/blob/main/instructions/go-mcp-server.instructions.md -->
----
+## <!-- Based on: https://github.com/github/awesome-copilot/blob/main/instructions/go-mcp-server.instructions.md -->
+
 description: 'Best practices and patterns for building Model Context Protocol (MCP) servers in Go using the official github.com/modelcontextprotocol/go-sdk package.'
-applyTo: "**/*.go, **/go.mod, **/go.sum"
+applyTo: "**/\*.go, **/go.mod, \*\*/go.sum"
+
 ---
 
 # Go MCP Server Development Guidelines
@@ -54,20 +55,34 @@ Use `mcp.AddPrompt` for reusable prompt templates:
 ## Transport Configuration
 
 ### Stdio Transport
+
 For communication over stdin/stdout (most common for desktop integrations):
+
 ```go
 if err := server.Run(ctx, &mcp.StdioTransport{}); err != nil {
     log.Fatal(err)
 }
 ```
 
-### HTTP Transport
-For HTTP-based communication:
+### Streamable HTTP Transport
+
+For HTTP-based communication using the current MCP specification:
+
 ```go
-transport := &mcp.HTTPTransport{
-    Addr: ":8080",
+handler := mcp.NewStreamableHTTPHandler(func(r *http.Request) *mcp.Server {
+    return server
+}, &mcp.StreamableHTTPOptions{
+    JSONResponse: true,
+    Logger:       slog.Default(),
+})
+
+httpServer := &http.Server{
+    Addr:              ":8080",
+    Handler:           handler,
+    ReadHeaderTimeout: 5 * time.Second,
 }
-if err := server.Run(ctx, transport); err != nil {
+
+if err := httpServer.ListenAndServe(); err != nil {
     log.Fatal(err)
 }
 ```
@@ -128,10 +143,13 @@ go get github.com/modelcontextprotocol/go-sdk@latest
 ## Common Patterns
 
 ### Logging
+
 Use structured logging with `log/slog`
 
 ### Configuration
+
 Use environment variables or config files for settings
 
 ### Graceful Shutdown
+
 Handle shutdown signals properly using `signal.Notify`
